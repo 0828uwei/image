@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>房間物品配對遊戲</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; padding: 20px; text-align: center; }
+    .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+    .image-box { width: 150px; text-align: center; }
+    .image-box img { width: 100%; border: 1px solid #ccc; border-radius: 10px; }
+    .drop-zone {
+      border: 2px dashed #aaa;
+      min-height: 40px;
+      margin-top: 10px;
+      padding: 5px;
+      border-radius: 6px;
+      min-height: 40px;
+    }
+
+    .word-list {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 30px;
+      min-height: 60px;
+    }
+
+    .word {
+      background: #f2f2f2;
+      border: 1px solid #ccc;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: grab;
+      font-size: 18px;
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .correct { background-color: #c8f7c5; }
+    .incorrect { background-color: #f8c5c5; }
+
+    .message {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🧠 請將正確的韓文單字拖曳到對應的圖片下方</h2>
+
+  <div class="container">
+    <div class="image-box" data-answer="침대">
+      <img src="images/bed.jpg" alt="침대">
+      <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+    </div>
+    <div class="image-box" data-answer="의자">
+      <img src="images/chair.jpg" alt="의자">
+      <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+    </div>
+    <div class="image-box" data-answer="책상">
+      <img src="images/desk.jpg" alt="책상">
+      <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+    </div>
+    <div class="image-box" data-answer="옷장">
+      <img src="images/closet.jpg" alt="옷장">
+      <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+    </div>
+    <div class="image-box" data-answer="시계">
+      <img src="images/clock.jpg" alt="시계">
+      <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+    </div>
+  </div>
+
+  <div class="word-list" id="word-list" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <div class="word" draggable="true" ondragstart="drag(event)" id="침대">침대</div>
+    <div class="word" draggable="true" ondragstart="drag(event)" id="책상">책상</div>
+    <div class="word" draggable="true" ondragstart="drag(event)" id="의자">의자</div>
+    <div class="word" draggable="true" ondragstart="drag(event)" id="옷장">옷장</div>
+    <div class="word" draggable="true" ondragstart="drag(event)" id="시계">시계</div>
+  </div>
+
+  <button onclick="checkAnswers()">檢查答案</button>
+
+  <div class="message" id="message"></div>
+
+  <script>
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    function drag(ev) {
+      ev.dataTransfer.setData("text/plain", ev.target.id);
+    }
+
+    function drop(ev) {
+      ev.preventDefault();
+      const id = ev.dataTransfer.getData("text/plain");
+      const dragged = document.getElementById(id);
+
+      if (ev.target.classList.contains('drop-zone') && ev.target.children.length === 0) {
+        ev.target.appendChild(dragged);
+      }
+      if (ev.target.id === 'word-list') {
+        ev.target.appendChild(dragged);
+      }
+    }
+
+    function checkAnswers() {
+      let correctCount = 0;
+      const boxes = document.querySelectorAll(".image-box");
+      const wordList = document.getElementById("word-list");
+
+      boxes.forEach(box => {
+        const answer = box.getAttribute("data-answer");
+        const dropZone = box.querySelector(".drop-zone");
+        const dropped = dropZone.children[0];
+
+        if (dropped && dropped.id === answer) {
+          dropZone.classList.remove("incorrect");
+          dropZone.classList.add("correct");
+          correctCount++;
+        } else {
+          dropZone.classList.remove("correct");
+          dropZone.classList.add("incorrect");
+
+          if (dropped) {
+            wordList.appendChild(dropped);
+          }
+        }
+      });
+
+      const msg = document.getElementById("message");
+      if (correctCount === 5) {
+        msg.innerText = "🎉 全部答對了！太棒了！";
+        msg.style.color = "green";
+      } else {
+        msg.innerText = `目前答對 ${correctCount} 題，錯的已移除，請繼續加油！`;
+        msg.style.color = "red";
+      }
+    }
+  </script>
+
+</body>
+</html>
